@@ -9,6 +9,7 @@ public class Nonogram {
   public static List<List<Integer>> rowClue;
   public static List<List<Integer>> colClue;
   public static int[][] board;
+  public static FileWriter fileWriter;
 
   public Nonogram() {
     // read the test
@@ -16,7 +17,8 @@ public class Nonogram {
     try {
       File file = new File(".");
       scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_1_Dancer.txt"));
-    } catch (FileNotFoundException e) {
+      fileWriter = new FileWriter(file.getAbsolutePath() + "/res/Output/output.txt");
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
@@ -41,7 +43,7 @@ public class Nonogram {
     }
   }
 
-  public void naive(int i, int j, int row) {
+  public void naive(int i, int j, int row) throws IOException {
     if(row == HEIGHT) {
       if(checkAnswer()) {
         printBoard();
@@ -52,6 +54,8 @@ public class Nonogram {
 
     if(!checkValid())
       return;
+
+    fileWriter.write(row + " " + i + " " + j + '\n');
 
     if(i >= WIDTH) {
       if(j < rowClue.get(row).size())
@@ -73,6 +77,7 @@ public class Nonogram {
       board[row][k] = 1;
 
     printBoard();
+
     naive(i + len + 1, j + 1, row);
 
     for(int k = i; k < i + len; k ++)
@@ -117,14 +122,14 @@ public class Nonogram {
     }
   }
 
-  public void printBoard() {
+  public void printBoard() throws IOException {
     for(int i = 0; i < HEIGHT; i ++) {
       for(int j = 0; j < WIDTH; j ++) {
-        System.out.print(board[i][j]);
+        fileWriter.write((board[i][j] == 1 ? '*' : '.'));
       }
-      System.out.println();
+      fileWriter.write('\n');
     }
-    System.out.println();
+    fileWriter.write('\n');
   }
 
   public boolean checkAnswer() {
@@ -132,40 +137,24 @@ public class Nonogram {
     int it;
     List<Integer> tmp;
 
-    for(int i = 0; i < WIDTH; i ++) {
+    for(int i = 0; i < HEIGHT; i ++) {
       x = 0;
       it = 0;
       tmp = colClue.get(i);
-      for(int j = 0; j < HEIGHT; j ++) {
-        if(board[j][i] == 0) {
-          if(x != 0) {
-            if(it == tmp.size()) {
-              return false;
-            } else {
-              if (x == tmp.get(it)) {
-                it++;
-                x = 0;
-              } else {
-                return false;
-              }
-            }
-          }
-        } else {
-          x ++;
-        }
-      }
-
-      if(x != 0) {
-        if(it == tmp.size()) {
-          return false;
-        } else {
-          if(x != tmp.get(it))
+      for(int j = 0; j < WIDTH; j ++) {
+        if(board[i][j] == 1) {
+          if(it == tmp.size())
             return false;
+
+          int len = tmp.get(it ++);
+          for(int k = j; k < j + len; k ++) {
+            if(k == WIDTH)
+              return false;
+            if(board[i][k] == 0)
+              return false;
+          }
         }
       }
-
-      if(it != tmp.size())
-        return false;
     }
 
     return true;
