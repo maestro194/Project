@@ -44,6 +44,8 @@ public class Nonogram {
   }
 
   public void naive(int i, int j, int row) throws IOException {
+    fileWriter.write(row + " " + i + " " + j + '\n');
+
     if(row == HEIGHT) {
       if(checkAnswer()) {
         printBoard();
@@ -54,8 +56,6 @@ public class Nonogram {
 
     if(!checkValid())
       return;
-
-    fileWriter.write(row + " " + i + " " + j + '\n');
 
     if(i >= WIDTH) {
       if(j < rowClue.get(row).size())
@@ -133,28 +133,35 @@ public class Nonogram {
   }
 
   public boolean checkAnswer() {
-    int x;
     int it;
     List<Integer> tmp;
 
-    for(int i = 0; i < HEIGHT; i ++) {
-      x = 0;
+    for(int j = 0; j < WIDTH; j ++) {
       it = 0;
-      tmp = colClue.get(i);
-      for(int j = 0; j < WIDTH; j ++) {
+      tmp = colClue.get(j);
+      for(int i = 0; i < HEIGHT; i ++) {
         if(board[i][j] == 1) {
           if(it == tmp.size())
             return false;
 
           int len = tmp.get(it ++);
-          for(int k = j; k < j + len; k ++) {
-            if(k == WIDTH)
+          for(int k = i; k < i + len; k ++) {
+            if (k == HEIGHT)
               return false;
-            if(board[i][k] == 0)
+            if (board[k][j] == 0)
               return false;
           }
+
+          i += len;
+          if(i == HEIGHT)
+            continue;
+          if(board[i][j] == 1)
+            return false;
         }
       }
+
+      if(it < tmp.size())
+        return false;
     }
 
     return true;
