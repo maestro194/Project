@@ -8,6 +8,10 @@ public class Nonogram {
   public static int HEIGHT;
   public static List<List<Integer>> rowClue;
   public static List<List<Integer>> colClue;
+  public static List<List<Integer>> rowClueLeft;
+  public static List<List<Integer>> colClueLeft;
+  public static List<List<Integer>> rowClueRight;
+  public static List<List<Integer>> colClueRight;
   public static int[][] board;
   public static FileWriter fileWriter;
 
@@ -16,7 +20,7 @@ public class Nonogram {
     Scanner scanner;
     try {
       File file = new File(".");
-      scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_2_Cat.txt"));
+      scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_1_Dancer.txt"));
       fileWriter = new FileWriter(file.getAbsolutePath() + "/res/Output/output.txt");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -25,9 +29,13 @@ public class Nonogram {
     // set up the board
     WIDTH = scanner.nextInt();
     HEIGHT = scanner.nextInt();
-    board = new int[HEIGHT][WIDTH];
+    board = new int[HEIGHT][WIDTH];       // change to bitmask
     rowClue = new ArrayList<>();
     colClue = new ArrayList<>();
+    rowClueLeft = new ArrayList<>();
+    colClueLeft = new ArrayList<>();
+    rowClueRight = new ArrayList<>();
+    colClueRight = new ArrayList<>();
     scanner.nextLine();
 
     // read the width clue
@@ -40,6 +48,65 @@ public class Nonogram {
     for(int i = 0; i < HEIGHT; i ++) {
       String s = scanner.nextLine();
       rowClue.add(stringToList(s));
+    }
+
+  // set up left and right clue range
+    // row
+    for(int i = 0; i < HEIGHT; i ++) {
+      List<Integer> tmpLeft = new ArrayList<>();
+      List<Integer> tmpRight = new ArrayList<>();
+      List<Integer> tmpClue = rowClue.get(i);
+
+      for(int j = 0; j < tmpClue.size(); j ++) {
+        int num;
+        // left
+        if(j == 0) {
+          tmpLeft.add(0);
+        } else {
+          num = j;
+          for(int k = 0; k < j; k ++)
+            num += tmpClue.get(k);
+          tmpLeft.add(num);
+        }
+
+        // right
+        num = WIDTH - 1 - (tmpClue.get(j) - 1);
+        for(int k = j + 1; k < tmpClue.size(); k ++)
+          num -= tmpClue.get(k) + 1;
+        tmpRight.add(num);
+      }
+
+      rowClueLeft.add(tmpLeft);
+      rowClueRight.add(tmpRight);
+    }
+
+    // col
+    for(int j = 0; j < WIDTH; j ++) {
+      List<Integer> tmpLeft = new ArrayList<>();
+      List<Integer> tmpRight = new ArrayList<>();
+      List<Integer> tmpClue = colClue.get(j);
+
+      for(int i = 0; i < tmpClue.size(); i ++) {
+        int num;
+        // left
+        if(i == 0) {
+          tmpLeft.add(0);
+        } else {
+          num = i;
+          for(int k = 0; k < i; k ++)
+            num += tmpClue.get(k);
+          tmpLeft.add(num);
+        }
+
+        // right
+        num = HEIGHT - 1 - (tmpClue.get(i) - 1);
+        for(int k = i + 1; k < tmpClue.size(); k ++)
+          num -= tmpClue.get(k) + 1;
+        tmpRight.add(num);
+      }
+
+      colClueLeft.add(tmpLeft);
+      colClueRight.add(tmpRight);
     }
   }
 
@@ -83,15 +150,68 @@ public class Nonogram {
     naive(i + 1, j, row);
   }
 
-  public void rowLineSolving(int row) {
+  public void rowSimpleBoxes(int row) {
     List<Integer> clue = rowClue.get(row);
 
+    for(int i = 0; i < clue.size(); i ++) {
+      int front = 0;
+      int back = WIDTH - 1;
+
+      // prev next calculation
+      for(int j = i - 1; j >= 0; j --)
+        front += clue.get(j) + 1;
+      for(int j = i + 1; j < clue.size(); j ++)
+        back -= clue.get(j) - 1;
+
+      // filling
+      if(back - front + 1 >= clue.get(i) * 2)
+        continue;
+      int l = back + 1 - clue.get(i);
+      int r = front - 1 + clue.get(i);
+
+      for(int j = l; j <= r; j ++)
+        board[row][j] = 1;
+    }
+  }
+
+  public void colSimpleBoxes(int col) throws IOException {
+    List<Integer> clue = colClue.get(col);
+
+    for(int i = 0; i < clue.size(); i ++) {
+      int front = 0;
+      int back = HEIGHT - 1;
+
+      // prev next calculation
+      for(int j = i - 1; j >= 0; j --)
+        front += clue.get(j) + 1;
+      for(int j = i + 1; j < clue.size(); j ++)
+        back -= clue.get(j) - 1;
+
+      try {
+        fileWriter.write(front + " " + back);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      // filling
+      if(back - front + 1 >= clue.get(i) * 2)
+        continue;
+      int l = back + 1 - clue.get(i);
+      int r = front - 1 + clue.get(i);
+
+      if(l > r)
+        continue;
+
+      for(int j = l; j <= r; j ++)
+        board[j][col] = 1;
+    }
+  }
+
+  public void rowSimpleSpaces(int row) {
 
   }
 
-  public void colLineSolving(int col) {
-    List<Integer> clue = colClue.get(col);
-
+  public void colSimpleSpaces(int col) {
 
   }
 
