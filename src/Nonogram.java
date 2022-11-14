@@ -16,7 +16,7 @@ public class Nonogram {
     Scanner scanner;
     try {
       File file = new File(".");
-      scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_1_Dancer.txt"));
+      scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_2_Cat.txt"));
       fileWriter = new FileWriter(file.getAbsolutePath() + "/res/Output/output.txt");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -44,8 +44,6 @@ public class Nonogram {
   }
 
   public void naive(int i, int j, int row) throws IOException {
-    fileWriter.write(row + " " + i + " " + j + '\n');
-
     if(row == HEIGHT) {
       if(checkAnswer()) {
         printBoard();
@@ -76,7 +74,7 @@ public class Nonogram {
     for(int k = i; k < i + len; k ++)
       board[row][k] = 1;
 
-    printBoard();
+    // printBoard();
 
     naive(i + len + 1, j + 1, row);
 
@@ -85,7 +83,15 @@ public class Nonogram {
     naive(i + 1, j, row);
   }
 
-  public void lineSolving(int type, int line) {
+  public void rowLineSolving(int row) {
+    List<Integer> clue = rowClue.get(row);
+
+
+  }
+
+  public void colLineSolving(int col) {
+    List<Integer> clue = colClue.get(col);
+
 
   }
 
@@ -105,31 +111,14 @@ public class Nonogram {
     return val;
   }
 
-  public void printClue() {
-    for(int i = 0; i < WIDTH; i ++) {
-      List<Integer> tmp = colClue.get(i);
-      for (Integer integer : tmp) {
-        System.out.print(integer + " ");
-      }
-      System.out.println();
-    }
-    for(int i = 0; i < HEIGHT; i ++) {
-      List<Integer> tmp = rowClue.get(i);
-      for (Integer integer : tmp) {
-        System.out.print(integer + " ");
-      }
-      System.out.println();
-    }
-  }
-
   public void printBoard() throws IOException {
     for(int i = 0; i < HEIGHT; i ++) {
       for(int j = 0; j < WIDTH; j ++) {
-        fileWriter.write((board[i][j] == 1 ? '*' : '.'));
+        System.out.print((board[i][j] == 1 ? '*' : '.'));
       }
-      fileWriter.write('\n');
+      System.out.print('\n');
     }
-    fileWriter.write('\n');
+    System.out.print('\n');
   }
 
   public boolean checkAnswer() {
@@ -154,7 +143,7 @@ public class Nonogram {
 
           i += len;
           if(i == HEIGHT)
-            continue;
+            break;
           if(board[i][j] == 1)
             return false;
         }
