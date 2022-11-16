@@ -1,0 +1,7 @@
+MurmurHash3.o: MurmurHash3.cc MurmurHash3.h
+common.o: common.cc config.h nono.h naughty.h
+main.o: main.cc config.h nono.h naughty.h
+naughty.o: naughty.cc config.h nono.h MurmurHash3.h naughty.h
+naughty_old.o: naughty_old.cc
+naughty_test.o: naughty_test.cc config.h nono.h naughty.h
+read.o: read.cc nono.h config.h

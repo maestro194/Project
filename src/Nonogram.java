@@ -14,16 +14,18 @@ public class Nonogram {
   public static List<List<Integer>> colClueRight;
   public static int[][] board;
   public static FileWriter fileWriter;
+  public static BufferedWriter bufferedWriter;
 
   public Nonogram() {
     // read the test
-    Scanner scanner;
+    Scanner scanner = new Scanner(System.in);
+
     try {
       File file = new File(".");
       scanner = new Scanner(new File(file.getAbsolutePath() + "/res/Test/Test_1_Dancer.txt"));
       fileWriter = new FileWriter(file.getAbsolutePath() + "/res/Output/output.txt");
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      e.printStackTrace();
     }
 
     // set up the board
@@ -154,14 +156,8 @@ public class Nonogram {
     List<Integer> clue = rowClue.get(row);
 
     for(int i = 0; i < clue.size(); i ++) {
-      int front = 0;
-      int back = WIDTH - 1;
-
-      // prev next calculation
-      for(int j = i - 1; j >= 0; j --)
-        front += clue.get(j) + 1;
-      for(int j = i + 1; j < clue.size(); j ++)
-        back -= clue.get(j) - 1;
+      int front = rowClueLeft.get(row).get(i);
+      int back = rowClueRight.get(row).get(i) + clue.get(i) - 1;
 
       // filling
       if(back - front + 1 >= clue.get(i) * 2)
@@ -178,20 +174,8 @@ public class Nonogram {
     List<Integer> clue = colClue.get(col);
 
     for(int i = 0; i < clue.size(); i ++) {
-      int front = 0;
-      int back = HEIGHT - 1;
-
-      // prev next calculation
-      for(int j = i - 1; j >= 0; j --)
-        front += clue.get(j) + 1;
-      for(int j = i + 1; j < clue.size(); j ++)
-        back -= clue.get(j) - 1;
-
-      try {
-        fileWriter.write(front + " " + back);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      int front = colClueLeft.get(col).get(i);
+      int back = colClueRight.get(col).get(i) + clue.get(i) - 1;
 
       // filling
       if(back - front + 1 >= clue.get(i) * 2)
@@ -207,15 +191,34 @@ public class Nonogram {
     }
   }
 
-  public void rowSimpleSpaces(int row) {
+  public void rowSimpleSpaces() {
+    for(int u = 0; u < HEIGHT; u ++) { // each row
+      for (int i = 0; i < WIDTH; i ++) { // comp of row
+        for (int v = 0; v < rowClue.get(u).size(); v++) { // clue of row
 
+        }
+      }
+    }
   }
 
   public void colSimpleSpaces(int col) {
+    for(int i = 0; i < HEIGHT; i ++) {
+      boolean flagUp = true;
+      boolean flagDown = true;
 
+      for(int j = 0; j < colClue.get(col).size(); j ++) {
+        if(colClueLeft.get(col).get(j) <= i)
+          flagUp = false;
+        if(colClueRight.get(col).get(j) + colClue.get(col).get(j) >= i)
+          flagDown = false;
+      }
+
+      if(flagUp || flagDown)
+        board[i][col] = 2;
+    }
   }
 
-  private ArrayList<Integer> stringToList(String s) {
+  public ArrayList<Integer> stringToList(String s) {
     ArrayList<Integer> val = new ArrayList<>();
     int x = 0;
 
@@ -234,11 +237,37 @@ public class Nonogram {
   public void printBoard() throws IOException {
     for(int i = 0; i < HEIGHT; i ++) {
       for(int j = 0; j < WIDTH; j ++) {
-        System.out.print((board[i][j] == 1 ? '*' : '.'));
+        fileWriter.write((board[i][j] == 1 ? '*' : (board[i][j] == 2 ? 'x' : '.')));
       }
-      System.out.print('\n');
+      fileWriter.write('\n');
     }
-    System.out.print('\n');
+    fileWriter.write('\n');
+    fileWriter.flush();
+  }
+
+  public void printLR() {
+    for(int j = 0; j < Nonogram.rowClue.size(); j ++) {
+      System.out.println("Row " + j + ":");
+      for(int k = 0; k < Nonogram.rowClue.get(j).size(); k ++) {
+        System.out.print(Nonogram.rowClueLeft.get(j).get(k) + " ");
+        System.out.println(Nonogram.rowClueRight.get(j).get(k));
+      }
+      System.out.println();
+    }
+
+    for(int i = 0; i < Nonogram.colClue.size(); i ++) {
+      System.out.println("Col " + i + ":");
+      for(int j = 0; j < Nonogram.colClue.get(i).size(); j ++) {
+        System.out.print(Nonogram.colClueLeft.get(i).get(j) + " ");
+        System.out.println(Nonogram.colClueRight.get(i).get(j));
+      }
+      System.out.println();
+    }
+  }
+
+  public void close() throws IOException {
+    if(fileWriter != null)
+      fileWriter.close();
   }
 
   public boolean checkAnswer() {
@@ -257,7 +286,7 @@ public class Nonogram {
           for(int k = i; k < i + len; k ++) {
             if (k == HEIGHT)
               return false;
-            if (board[k][j] == 0)
+            if (board[k][j] != 1)
               return false;
           }
 

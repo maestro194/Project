@@ -1,0 +1,28 @@
+# How to config
+
+By default, naughty only support board size up to 31x31. You can modify
+config.h to make it support larger board, up to 63x63.
+
+# How to build
+
+Just run 'make'. It should be no problem to build on FreeBSD and Linux.
+
+# How to run
+
+Run ./naughty with data input from stdin. And it will output to stdout.
+It accepts Steve Simpson's [non format][1].
+
+You can specify command line argument -u to check solution uniqueness.
+
+[1]: http://www.comp.lancs.ac.uk/~ss/nonogram/fmt2
+
+# License
+
+MurmurHash3.{cc,h} are written by Austin Appleby and was released in public
+domain. All other code are written by myself, released in Apache license 2.0.
+
+# More
+
+Please visit [naughty's site][site] for more information.
+
+[site]:http://kcwu.csie.org/~kcwu/nonogram/naughty/
