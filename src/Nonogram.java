@@ -186,8 +186,8 @@ public class Nonogram {
         if (first + clue.get(i) - 1 < last - clue.get(i) + 1)
           continue;
 
-        int l = Math.min(Math.max(last - clue.get(i) + 1, 0), WIDTH - 1);
-        int r = Math.min(Math.max(first + clue.get(i) - 1, 0), WIDTH - 1);
+        int l = last - clue.get(i) + 1;
+        int r = first + clue.get(i) - 1;
 
         for (int j = l; j <= r; j++)
           board[row][j] = 1;
@@ -207,8 +207,8 @@ public class Nonogram {
         if (first + clue.get(i) - 1 < last - clue.get(i) + 1)
           continue;
 
-        int l = Math.min(Math.max(last - clue.get(i) + 1, 0), HEIGHT - 1);
-        int r = Math.min(Math.max(first + clue.get(i) - 1, 0), HEIGHT - 1);
+        int l = last - clue.get(i) + 1;
+        int r = first + clue.get(i) - 1;
 
         for (int j = l; j <= r; j++)
           board[j][col] = 1;
@@ -265,7 +265,7 @@ public class Nonogram {
 
         if(flag == 0) { // for every clue m, nothing needs board(j, n)
           board[i][n] = 2;
-          for (int j = 0; j < rowClue.get(j).size(); j ++)
+          for (int j = 0; j < rowClue.get(i).size(); j ++)
             alpha[i][j][n] = 0;
         }
 
@@ -287,11 +287,6 @@ public class Nonogram {
   public void rowForcing() {
     for(int u = 0; u < HEIGHT; u ++) {
       for(int v = 0; v < rowClue.get(u).size(); v ++) {
-        // method 4
-        int first = rowClueLeft.get(u).get(v);
-        int last = rowClueRight.get(u).get(v) + rowClue.get(u).get(v) - 1;
-        int cnt = 0;
-
         for(int i = 0; i < WIDTH; i ++) {
           if(alpha[u][v][i] == 0) {
             // method 1
@@ -313,28 +308,32 @@ public class Nonogram {
                 alpha[u][v][j] = 0;
             }
           }
-
-          // method 4 calculation
-          cnt += alpha[u][v][i];
         }
+        // left right recalculation
+        int first = rowClueLeft.get(u).get(v);
+        int last = rowClueRight.get(u).get(v);
+        while(first < last && alpha[u][v][first] == 0)
+          first ++;
+        while(first < last && alpha[u][v][last + rowClue.get(u).get(v) - 1] == 0)
+          last --;
+        rowClueLeft.get(u).set(v, first);
+        rowClueRight.get(u).set(v, last);
 
-        // method 4 finalize
-        if(cnt == rowClue.get(u).get(v)) {
+        // method 4
+        first = rowClueLeft.get(u).get(v);
+        last = rowClueRight.get(u).get(v) + rowClue.get(u).get(v) - 1;
+        int cnt = 0;
+        for(int i = 0; i < WIDTH; i ++)
+          cnt += alpha[u][v][i];
+
+        if(cnt == rowClue.get(u).get(v) && last - first + 1 == rowClue.get(u).get(v)) {
           for(int w = 0; w < v; w ++)
             for(int i = first - 1; i < WIDTH; i ++)
               alpha[u][w][i] = 0;
           for(int w = v + 1; w < rowClue.get(u).size(); w ++)
-            for(int i = 0; i <= Math.min(WIDTH, last + 1); i ++)
+            for(int i = 0; i <= Math.min(WIDTH - 1, last + 1); i ++)
               alpha[u][w][i] = 0;
         }
-
-        // left right recalculation
-        while(first < last && alpha[u][v][first] == 0)
-          first ++;
-        while(last > first + rowClue.get(u).get(v) - 1 && alpha[u][v][last] == 0)
-          last --;
-        rowClueLeft.get(u).set(v, first);
-        rowClueRight.get(u).set(v, last - rowClue.get(u).get(v) + 1);
       }
     }
   }
@@ -342,11 +341,6 @@ public class Nonogram {
   public void colForcing() {
     for(int n = 0; n < WIDTH; n ++) {
       for(int m = 0; m < colClue.get(n).size(); m ++) {
-        // method 4
-        int first = colClueLeft.get(n).get(m);
-        int last = colClueRight.get(n).get(m) + colClue.get(n).get(m) - 1;
-        int cnt = 0;
-
         for(int i = 0; i < HEIGHT; i ++) {
           if(beta[m][n][i] == 0) {
             // method 1
@@ -367,28 +361,33 @@ public class Nonogram {
               for(int j = i + 1; j < HEIGHT; j ++)
                 beta[m][n][j] = 0;
           }
-
-          // method 4 calculation
-          cnt += beta[m][n][i];
-        }
-
-        // method 4 finalize
-        if(cnt == colClue.get(n).get(m)) {
-          for(int w = 0; w < m; w ++)
-            for(int i = first - 1; i < WIDTH; i ++)
-              beta[w][n][i] = 0;
-          for(int w = m + 1; w < colClue.get(n).size(); w ++)
-            for(int i = 0; i < Math.min(WIDTH, last + 1); i ++)
-              beta[w][n][i] = 0;
         }
 
         // left right recalculation
-        while(first < HEIGHT && beta[m][n][first] == 0)
+        int first = colClueLeft.get(n).get(m);
+        int last = colClueRight.get(n).get(m);
+        while(first < last && beta[m][n][first] == 0)
           first ++;
-        while(last > first + colClue.get(n).get(m) - 1 && beta[m][n][last] == 0)
+        while(first < last && beta[m][n][last + colClue.get(n).get(m) - 1] == 0)
           last --;
         colClueLeft.get(n).set(m, first);
-        colClueRight.get(n).set(m, last - colClue.get(n).get(m) + 1);
+        colClueRight.get(n).set(m, last);
+
+        // method 4
+        int cnt = 0;
+        for(int i = 0; i < HEIGHT; i ++)
+          cnt += beta[m][n][i];
+        first = colClueLeft.get(n).get(m);
+        last = colClueRight.get(n).get(m) + colClue.get(n).get(m) - 1;
+
+        if(cnt == colClue.get(n).get(m) && last - first + 1 == colClue.get(n).get(m)) {
+          for(int w = 0; w < m; w ++)
+            for(int i = first - 1; i < HEIGHT; i ++)
+              beta[w][n][i] = 0;
+          for(int w = m + 1; w < colClue.get(n).size(); w ++)
+            for(int i = 0; i <= Math.min(HEIGHT - 1, last + 1); i ++)
+              beta[w][n][i] = 0;
+        }
       }
     }
   }
@@ -424,6 +423,7 @@ public class Nonogram {
   public void printAB() throws IOException {
     fileWriter.write("alpha board:\n");
     for (int u = 0; u < HEIGHT; u++) {
+      fileWriter.write("Row " + (u + 1) + "\n");
       for (int v = 0; v < rowClue.get(u).size(); v++) {
         for (int i = 0; i < WIDTH; i++) {
           int tmp = alpha[u][v][i];
