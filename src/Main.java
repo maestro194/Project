@@ -1,23 +1,29 @@
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    Nonogram nonogram = new Nonogram();
+    Nonogram nonogram = new Nonogram("Test_1_Dancer.txt");
 
-    // simple boxes method
-    for(int i = 0; i < Nonogram.WIDTH; i ++)
-      nonogram.colSimpleBoxes(i);
-    for(int i = 0; i < Nonogram.HEIGHT; i ++)
-      nonogram.rowSimpleBoxes(i);
+    int totalRun = 10;
 
-    // simple spaces method
-    for(int i = 0; i < Nonogram.WIDTH; i ++)
-      nonogram.colSimpleSpaces(i);
-    nonogram.rowSimpleSpaces();
+    for(int run = 0; run < totalRun; run ++) {
+      // simple boxes method
+      nonogram.rowSimpleBoxes();
+      nonogram.colSimpleBoxes();
 
-    // board after solve
-    nonogram.printBoard();
+      // simple spaces method
+      nonogram.rowSimpleSpaces();
+      nonogram.colSimpleSpaces();
+
+      // forcing method
+      nonogram.rowForcing();
+      nonogram.colForcing();
+
+      nonogram.printAB();
+
+      // board after run
+      nonogram.printBoard();
+    }
 
     // closing
     nonogram.close();
