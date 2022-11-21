@@ -4,7 +4,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     Nonogram nonogram = new Nonogram("Test_2_Cat.txt");
 
-    int totalRun = 32;
+    int totalRun = 33;
 
     for(int run = 0; run < totalRun; run ++) {
       // simple boxes method
@@ -19,6 +19,10 @@ public class Main {
       nonogram.rowForcing();
       nonogram.colForcing();
 
+      // range recalculaiton
+      nonogram.firstLastRecalculation();
+
+      // board debug
       nonogram.printAB();
 
       // board after run

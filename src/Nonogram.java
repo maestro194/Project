@@ -392,6 +392,36 @@ public class Nonogram {
     }
   }
 
+  public void firstLastRecalculation() {
+    for(int u = 0; u < HEIGHT; u ++) {
+      for(int v = rowClue.get(u).size() - 2; v >= 0; v --) {
+        int thisLast = rowClueRight.get(u).get(v);
+        int nextLast = rowClueRight.get(u).get(v + 1);
+        int thisClue = rowClue.get(u).get(v);
+
+        if(thisLast + thisClue + 1 >= nextLast) {
+          for(int i = nextLast - 1; i <= Math.max(thisLast + thisClue + 1, WIDTH - 1); i ++)
+            alpha[u][v][i] = 0;
+          thisLast = nextLast - thisClue - 1;
+          rowClueRight.get(u).set(v, thisLast);
+        }
+      }
+
+      for(int v = 1; v < rowClue.get(u).size(); v ++) {
+        int thisFirst = rowClueLeft.get(u).get(v);
+        int prevFirst = rowClueLeft.get(u).get(v - 1);
+        int prevClue = rowClue.get(u).get(v - 1);
+
+        if(prevFirst + prevClue + 1 >= thisFirst) {
+          for(int i = thisFirst; i <= Math.max(prevFirst + prevClue + 1, WIDTH - 1); i ++)
+            alpha[u][v][i] = 0;
+          thisFirst = prevFirst + prevClue + 1;
+          rowClueLeft.get(u).set(v, thisFirst);
+        }
+      }
+    }
+  }
+
   public ArrayList<Integer> stringToList(String s) {
     ArrayList<Integer> val = new ArrayList<>();
     int x = 0;
@@ -439,6 +469,7 @@ public class Nonogram {
 
     fileWriter.write("beta board:\n");
     for(int n = 0; n < WIDTH; n ++) {
+      fileWriter.write("Col " + (n + 1) + "\n");
       for(int m = 0; m < colClue.get(n).size(); m ++) {
         for(int i = 0; i < HEIGHT; i ++) {
           int tmp = beta[m][n][i];
