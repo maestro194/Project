@@ -132,12 +132,35 @@ public class Nonogram {
       colClueLeft.add(tmpLeft);
       colClueRight.add(tmpRight);
     }
+
+    // blank handling
+    // row
+    for(int u = 0; u < HEIGHT; u ++) {
+      if(rowClue.get(u).size() == 0) {
+        for(int i = 0; i < WIDTH; i ++) {
+          for(int j = 0; j < colClue.get(i).size(); j ++) {
+            beta[j][i][u] = 0;
+          }
+        }
+      }
+    }
+
+    // col
+    for(int n = 0; n < WIDTH; n ++) {
+      if(colClue.get(n).size() == 0) {
+        for(int i = 0; i < HEIGHT; i ++) {
+          for(int j = 0; j < rowClue.get(i).size(); j ++) {
+            alpha[i][j][n] = 0;
+          }
+        }
+      }
+    }
   }
 
   public void naive(int i, int j, int row) throws IOException {
     if (row == HEIGHT) {
       if (checkAnswer()) {
-        printBoard();
+        printBoard(1);
         System.exit(0);
       }
       return;
@@ -392,6 +415,158 @@ public class Nonogram {
     }
   }
 
+  public String rowPaint(int row, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return rowPaintImplement(row, pos, clue);
+  }
+
+  public String rowPaintImplement(int row, int pos, int clue) {
+    boolean fix0 = rowFix0(row, pos, clue);
+    boolean fix1 = rowFix1(row, pos, clue);
+
+    if(fix0 && !fix1)
+      return rowPaint0(row, pos, clue);
+    else if(!fix0 && fix1)
+      return rowPaint1(row, pos, clue);
+    else
+      return merge(rowPaint0(row, pos, clue), rowPaint1(row, pos, clue));
+  }
+
+  public String rowPaint1(int row, int pos, int clue) {
+    String tmp = "";
+    int len = rowClue.get(row).get(clue);
+    for(int i = pos - len + 1; i <= pos; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return rowPaint(row, pos - len - 1, clue - 1) + tmp;
+    else
+      return rowPaint(row, pos - len - 1, clue - 1) + "x" + tmp;
+  }
+
+  public String rowPaint0(int row, int pos, int clue) {
+    return rowPaint(row, pos - 1, clue) + "x";
+  }
+
+  public boolean rowFix(int row, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return rowFix0(row, pos, clue) | rowFix1(row, pos, clue);
+  }
+
+  public boolean rowFix0(int row, int pos, int clue) {
+    if(board[row][pos] == 0 || board[row][pos] == 2)
+      return rowFix(row, pos - 1, clue);
+    return false;
+  }
+
+  public boolean rowFix1(int row, int pos, int clue) {
+    if(clue >= 0) {
+      int len = rowClue.get(row).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int i = pos - len + 1; i <= pos; i ++)
+        if(board[row][i] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[row][pos - len] == 1)
+          return false;
+      return rowFix(row, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String colPaint(int col, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return colPaintImplement(col, pos, clue);
+  }
+
+  public String colPaintImplement(int col, int pos, int clue) {
+    boolean fix0 = colFix0(col, pos, clue);
+    boolean fix1 = colFix1(col, pos, clue);
+
+    if(fix0 && !fix1)
+      return colPaint0(col, pos, clue);
+    else if(!fix0 && fix1)
+      return colPaint1(col, pos, clue);
+    else
+      return merge(colPaint0(col, pos, clue), colPaint1(col, pos, clue));
+  }
+
+  public String colPaint0(int col, int pos, int clue) {
+    return colPaint(col, pos - 1, clue) + "x";
+  }
+
+  public String colPaint1(int col, int pos, int clue) {
+    String tmp = "";
+    int len = colClue.get(col).get(clue);
+    for(int i = 0; i < len; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return colPaint(col, pos - len - 1, clue - 1) + tmp;
+    else
+      return colPaint(col, pos - len - 1, clue - 1) + "x" + tmp;
+  }
+
+  public boolean colFix(int col, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return colFix0(col, pos, clue) | colFix1(col, pos, clue);
+  }
+
+  public boolean colFix0(int col, int pos, int clue) {
+    if(board[pos][col] == 0 || board[pos][col] == 2)
+      return colFix(col, pos - 1, clue);
+    return false;
+  }
+
+  public boolean colFix1(int col, int pos, int clue) {
+    if(clue >= 0) {
+      int len = colClue.get(col).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int j = pos - len + 1; j <= pos; j ++)
+        if(board[j][col] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[pos - len][col] == 1)
+          return false;
+      return colFix(col, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String merge(String paint0, String paint1) {
+    String val = "";
+    for(int i = 0; i < paint1.length(); i ++) {
+      char c1 = paint1.charAt(i);
+      char c0 = paint0.charAt(i);
+      val += (c1 != c0 ? '.' : c1);
+    }
+    return val;
+  }
+
+  public void rowDPSolving() {
+    for(int u = 0; u < HEIGHT; u ++) {
+      int clueSize = rowClue.get(u).size();
+      String solveStr = rowPaint(u, WIDTH - 1, clueSize - 1);
+
+      for(int i = 0; i < WIDTH; i ++)
+        board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
+    }
+  }
+
+  public void colDPSolving() {
+    for(int n = 0; n < WIDTH; n ++) {
+      int clueSize = colClue.get(n).size();
+      String solveStr = colPaint(n, HEIGHT - 1, clueSize - 1);
+
+      for(int j = 0; j < HEIGHT; j ++)
+        board[j][n] = (solveStr.charAt(j) == '.' ? 0 : solveStr.charAt(j) == '*' ? 1 : 2);
+    }
+  }
+
   public void firstLastRecalculation() {
     for(int u = 0; u < HEIGHT; u ++) {
       for(int v = rowClue.get(u).size() - 2; v >= 0; v --) {
@@ -399,12 +574,10 @@ public class Nonogram {
         int nextLast = rowClueRight.get(u).get(v + 1);
         int thisClue = rowClue.get(u).get(v);
 
-        if(thisLast + thisClue + 1 >= nextLast) {
-          for(int i = nextLast - 1; i <= Math.max(thisLast + thisClue + 1, WIDTH - 1); i ++)
-            alpha[u][v][i] = 0;
-          thisLast = nextLast - thisClue - 1;
-          rowClueRight.get(u).set(v, thisLast);
-        }
+        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
+          alpha[u][v][i] = 0;
+        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
+        rowClueRight.get(u).set(v, thisLast);
       }
 
       for(int v = 1; v < rowClue.get(u).size(); v ++) {
@@ -412,12 +585,34 @@ public class Nonogram {
         int prevFirst = rowClueLeft.get(u).get(v - 1);
         int prevClue = rowClue.get(u).get(v - 1);
 
-        if(prevFirst + prevClue + 1 >= thisFirst) {
-          for(int i = thisFirst; i <= Math.max(prevFirst + prevClue + 1, WIDTH - 1); i ++)
-            alpha[u][v][i] = 0;
-          thisFirst = prevFirst + prevClue + 1;
-          rowClueLeft.get(u).set(v, thisFirst);
-        }
+        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
+          alpha[u][v][i] = 0;
+        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
+        rowClueLeft.get(u).set(v, thisFirst);
+      }
+    }
+
+    for(int n = 0; n < WIDTH; n ++) {
+      for(int m = colClue.get(n).size() - 2; m >= 0; m --) {
+        int thisLast = colClueRight.get(n).get(m);
+        int nextLast = colClueRight.get(n).get(m + 1);
+        int thisClue = colClue.get(n).get(m);
+
+        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
+          beta[m][n][i] = 0;
+        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
+        colClueRight.get(n).set(m, thisLast);
+      }
+
+      for(int m = 1; m < colClue.get(n).size(); m ++) {
+        int thisFirst = colClueLeft.get(n).get(m);
+        int prevFirst = colClueLeft.get(n).get(m - 1);
+        int prevClue = colClue.get(n).get(m - 1);
+
+        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
+          beta[m][n][i] = 0;
+        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
+        colClueLeft.get(n).set(m, thisFirst);
       }
     }
   }
@@ -426,19 +621,27 @@ public class Nonogram {
     ArrayList<Integer> val = new ArrayList<>();
     int x = 0;
 
-    for (int i = 0; i < s.length(); i++) {
-      if (s.charAt(i) == ' ') {
-        val.add(x);
-        x = 0;
-      } else {
-        x = x * 10 + (s.charAt(i) - '0');
+    if(s.length() > 0) {
+      for (int i = 0; i < s.length(); i++) {
+        if (s.charAt(i) == ' ') {
+          val.add(x);
+          x = 0;
+        } else {
+          x = x * 10 + (s.charAt(i) - '0');
+        }
       }
+      val.add(x);
     }
-    val.add(x);
     return val;
   }
 
-  public void printBoard() throws IOException {
+  public void printBoard(int runCount) throws IOException {
+    if(checkAnswer())
+      fileWriter.write("Finished board\n");
+    else
+      fileWriter.write("Not finished board\n");
+    fileWriter.write("Total run: " + runCount + "\n");
+
     for (int i = 0; i < HEIGHT; i++) {
       for (int j = 0; j < WIDTH; j++) {
         fileWriter.write((board[i][j] == 1 ? '*' : (board[i][j] == 2 ? 'x' : '.')));
@@ -460,9 +663,8 @@ public class Nonogram {
           fileWriter.write((tmp == 1 ? '1' : '0'));
         }
         fileWriter.write('\n');
-        for (int j = 0; j < rowClue.get(u).size(); j ++)
-          fileWriter.write(rowClueLeft.get(u).get(j) + " " +
-                              rowClueRight.get(u).get(j) + '\n');
+        fileWriter.write(rowClueLeft.get(u).get(v) + " " +
+                              rowClueRight.get(u).get(v) + '\n');
       }
       fileWriter.write('\n');
     }
@@ -476,9 +678,8 @@ public class Nonogram {
           fileWriter.write((tmp == 1 ? '1' : '0'));
         }
         fileWriter.write('\n');
-        for(int j = 0; j < colClue.get(n).size(); j ++)
-          fileWriter.write(colClueLeft.get(n).get(j) + " " +
-                              colClueRight.get(n).get(j) + '\n');
+        fileWriter.write(colClueLeft.get(n).get(m) + " " +
+                              colClueRight.get(n).get(m) + '\n');
       }
       fileWriter.write('\n');
     }
@@ -574,5 +775,14 @@ public class Nonogram {
     if (tmp - 1 > WIDTH - pos)
       return false;
     return true;
+  }
+
+  public void writeRunTime(long time) {
+    try {
+      fileWriter.write("Program runtime: " + String.format("%.4f", (time * 1.0 / 1000000000)) + "s");
+      fileWriter.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

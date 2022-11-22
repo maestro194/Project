@@ -2,11 +2,16 @@ import java.io.IOException;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    Nonogram nonogram = new Nonogram("Test_2_Cat.txt");
+    String testname = "Test_1_Dancer.txt";
+    Nonogram nonogram = new Nonogram(testname);
+    long startTime = System.nanoTime();
 
-    int totalRun = 33;
+    int totalRun = 0;
 
-    for(int run = 0; run < totalRun; run ++) {
+    for(; ; totalRun ++) {
+      /*
+      brute force solution
+
       // simple boxes method
       nonogram.rowSimpleBoxes();
       nonogram.colSimpleBoxes();
@@ -24,14 +29,21 @@ public class Main {
 
       // board debug
       nonogram.printAB();
+      */
 
-      // board after run
-//      nonogram.printBoard();
+      // DP Solution
+      nonogram.rowDPSolving();
+      nonogram.colDPSolving();
+
+      if(nonogram.checkAnswer() || totalRun == 100) {
+        nonogram.printBoard(totalRun);
+        break;
+      }
     }
 
-    nonogram.printBoard();
-
     // closing
+    long endTime = System.nanoTime();
+    nonogram.writeRunTime(endTime - startTime);
     nonogram.close();
   }
 }
