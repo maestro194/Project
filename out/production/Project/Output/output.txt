@@ -1,66 +1,38 @@
-Not finished board
-Total run: 0
-.....
-.*...
-.....
-..*..
-..*..
-..*..
-..*..
-.*.*.
-...*.
-.....
-
-Not finished board
-Total run: 1
-.**..
-.**..
-.x*..
-.**..
-.x*x.
-.x*x.
-x.*.x
-x*x*x
-.*x*.
-..x..
-
-Not finished board
-Total run: 2
-x**xx
-x**x*
-.x*x*
-.***x
-.x*xx
-.x*xx
-x.*.x
-x*x*x
-x*x**
-..x.x
-
 Finished board
-Total run: 3
-x**xx
-x**x*
-xx*x*
-x***x
-*x*xx
-*x*xx
-xx**x
-x*x*x
-x*x**
-**xxx
+Total run: 5
+xxxxxxxxxxxxxxx*xx*xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxx**xx**xxxxxxxxxxxxxx
+xxxxxxxxxxxxx***xx***xxxxxxxxxxxxx
+xxxxxxxxxxxx**x*xx*x**xxxxxxxxxxxx
+xxxxxxxxxxx**xx*xx*xx**xxxxxxxxxxx
+xxxxxxxxxxx*xxx*xx*xxx*xxxxxxxxxxx
+xxxxxxxxxxx*xxx*xx*xxx*xxxxxxxxxxx
+xxxxxxxx******************xxxxxxxx
+xxxxxxx**xx*xxx*xx*xxx*xx**xxxxxxx
+xxxxxxx*xxx*xxx*xx*xxx*xxx*xxxxxxx
+xxxxxxx*xxx*xxx*xx*xxx*xxx*xxxxxxx
+xxxx**************************xxxx
+xxx**xx*xxx*xxx*xx*xxx*xxx*xx**xxx
+xx**xxx*xxx*xx**xx**xx*xxx*xxx**xx
+x**xxxx*xxx*x**xxxx**x*xxx*xxxx**x
+**************xxxxxx**************
+xxxxxxx*xxx*xxxxxxxxxx*xxx*xxxxxxx
+xxxxxxx*xxx*xxxxxxxxxx*xxx*xxxxxxx
+**************xxxxxx**************
+x**xxxx*xxx*x**xxxx**x*xxx*xxxx**x
+xx**xxx*xxx*xx**xx**xx*xxx*xxx**xx
+xxx**xx*xxx*xxx*xx*xxx*xxx*xx**xxx
+xxxx**************************xxxx
+xxxxxxx*xxx*xxx*xx*xxx*xxx*xxxxxxx
+xxxxxxx*xxx*xxx*xx*xxx*xxx*xxxxxxx
+xxxxxxx**xx*xxx*xx*xxx*xx**xxxxxxx
+xxxxxxxx******************xxxxxxxx
+xxxxxxxxxxx*xxx*xx*xxx*xxxxxxxxxxx
+xxxxxxxxxxx*xxx*xx*xxx*xxxxxxxxxxx
+xxxxxxxxxxx**xx*xx*xx**xxxxxxxxxxx
+xxxxxxxxxxxx**x*xx*x**xxxxxxxxxxxx
+xxxxxxxxxxxxx***xx***xxxxxxxxxxxxx
+xxxxxxxxxxxxxx**xx**xxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx*xx*xxxxxxxxxxxxxxx
 
-Finished board
-Total run: 3
-x**xx
-x**x*
-xx*x*
-x***x
-*x*xx
-*x*xx
-xx**x
-x*x*x
-x*x**
-**xxx
-
-Program runtime: 0.0557s
+Program runtime: 8.1551s
