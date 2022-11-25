@@ -2,14 +2,14 @@ import java.io.IOException;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    String testname = "Test_1_Dancer.txt";
+    String testname = "Test_4_Bucks.txt";
     Nonogram nonogram = new Nonogram(testname);
     long startTime = System.nanoTime();
 
     int totalRun = 0;
 
     for(; ; totalRun ++) {
-      /*
+    /*
       brute force solution
 
       // simple boxes method
@@ -29,13 +29,14 @@ public class Main {
 
       // board debug
       nonogram.printAB();
-      */
+    */
 
       // DP Solution
       nonogram.rowDPSolving();
       nonogram.colDPSolving();
 
-      if(nonogram.checkAnswer() || totalRun == 100) {
+      // Solution check
+      if(nonogram.checkAnswer() || totalRun == 500) {
         nonogram.printBoard(totalRun);
         break;
       }

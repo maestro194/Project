@@ -157,6 +157,9 @@ public class Nonogram {
     }
   }
 
+  // NAIVE SOLVE HERE
+  // Time Complexity:
+
   public void naive(int i, int j, int row) throws IOException {
     if (row == HEIGHT) {
       if (checkAnswer()) {
@@ -196,6 +199,8 @@ public class Nonogram {
       board[row][k] = 0;
     naive(i + 1, j, row);
   }
+
+  // BRUTE FORCE HERE
 
   public void rowSimpleBoxes() {
     for (int row = 0; row < HEIGHT; row++) {
@@ -415,6 +420,58 @@ public class Nonogram {
     }
   }
 
+  public void firstLastRecalculation() {
+    for(int u = 0; u < HEIGHT; u ++) {
+      for(int v = rowClue.get(u).size() - 2; v >= 0; v --) {
+        int thisLast = rowClueRight.get(u).get(v);
+        int nextLast = rowClueRight.get(u).get(v + 1);
+        int thisClue = rowClue.get(u).get(v);
+
+        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
+          alpha[u][v][i] = 0;
+        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
+        rowClueRight.get(u).set(v, thisLast);
+      }
+
+      for(int v = 1; v < rowClue.get(u).size(); v ++) {
+        int thisFirst = rowClueLeft.get(u).get(v);
+        int prevFirst = rowClueLeft.get(u).get(v - 1);
+        int prevClue = rowClue.get(u).get(v - 1);
+
+        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
+          alpha[u][v][i] = 0;
+        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
+        rowClueLeft.get(u).set(v, thisFirst);
+      }
+    }
+
+    for(int n = 0; n < WIDTH; n ++) {
+      for(int m = colClue.get(n).size() - 2; m >= 0; m --) {
+        int thisLast = colClueRight.get(n).get(m);
+        int nextLast = colClueRight.get(n).get(m + 1);
+        int thisClue = colClue.get(n).get(m);
+
+        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
+          beta[m][n][i] = 0;
+        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
+        colClueRight.get(n).set(m, thisLast);
+      }
+
+      for(int m = 1; m < colClue.get(n).size(); m ++) {
+        int thisFirst = colClueLeft.get(n).get(m);
+        int prevFirst = colClueLeft.get(n).get(m - 1);
+        int prevClue = colClue.get(n).get(m - 1);
+
+        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
+          beta[m][n][i] = 0;
+        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
+        colClueLeft.get(n).set(m, thisFirst);
+      }
+    }
+  }
+
+  // DP SOLVE HERE
+
   public String rowPaint(int row, int pos, int clue) {
     if(pos < 0)
       return "";
@@ -552,6 +609,12 @@ public class Nonogram {
       int clueSize = rowClue.get(u).size();
       String solveStr = rowPaint(u, WIDTH - 1, clueSize - 1);
 
+      try {
+        fileWriter.write(solveStr + "\n");
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
       for(int i = 0; i < WIDTH; i ++)
         board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
     }
@@ -564,56 +627,6 @@ public class Nonogram {
 
       for(int j = 0; j < HEIGHT; j ++)
         board[j][n] = (solveStr.charAt(j) == '.' ? 0 : solveStr.charAt(j) == '*' ? 1 : 2);
-    }
-  }
-
-  public void firstLastRecalculation() {
-    for(int u = 0; u < HEIGHT; u ++) {
-      for(int v = rowClue.get(u).size() - 2; v >= 0; v --) {
-        int thisLast = rowClueRight.get(u).get(v);
-        int nextLast = rowClueRight.get(u).get(v + 1);
-        int thisClue = rowClue.get(u).get(v);
-
-        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
-          alpha[u][v][i] = 0;
-        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
-        rowClueRight.get(u).set(v, thisLast);
-      }
-
-      for(int v = 1; v < rowClue.get(u).size(); v ++) {
-        int thisFirst = rowClueLeft.get(u).get(v);
-        int prevFirst = rowClueLeft.get(u).get(v - 1);
-        int prevClue = rowClue.get(u).get(v - 1);
-
-        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
-          alpha[u][v][i] = 0;
-        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
-        rowClueLeft.get(u).set(v, thisFirst);
-      }
-    }
-
-    for(int n = 0; n < WIDTH; n ++) {
-      for(int m = colClue.get(n).size() - 2; m >= 0; m --) {
-        int thisLast = colClueRight.get(n).get(m);
-        int nextLast = colClueRight.get(n).get(m + 1);
-        int thisClue = colClue.get(n).get(m);
-
-        for(int i = nextLast - 1; i < thisLast + thisClue; i ++)
-          beta[m][n][i] = 0;
-        thisLast = Math.min(thisLast, nextLast - thisClue - 1);
-        colClueRight.get(n).set(m, thisLast);
-      }
-
-      for(int m = 1; m < colClue.get(n).size(); m ++) {
-        int thisFirst = colClueLeft.get(n).get(m);
-        int prevFirst = colClueLeft.get(n).get(m - 1);
-        int prevClue = colClue.get(n).get(m - 1);
-
-        for(int i = thisFirst; i <= prevFirst + prevClue; i ++)
-          beta[m][n][i] = 0;
-        thisFirst = Math.max(thisFirst, prevFirst + prevClue + 1);
-        colClueLeft.get(n).set(m, thisFirst);
-      }
     }
   }
 
