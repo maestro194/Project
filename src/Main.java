@@ -48,6 +48,9 @@ public class Main {
       nonogram.rowDPSolving();
       nonogram.colDPSolving();
 
+      // small logic help
+      nonogram.fastLineSolving();
+
       if(nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
         nonogram.printBoard(totalRun);
         break;
