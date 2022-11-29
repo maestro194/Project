@@ -760,7 +760,17 @@ public class Nonogram {
   }
 
   public void twoSATSolve() {
+    List<List<Integer>> edge = new ArrayList<>();
+    for(int i = 0; i < WIDTH * HEIGHT; i ++)
+      edge.add(new ArrayList<>());
 
+    for(int i = 0; i < HEIGHT; i ++) {
+      for(int j = 0; j < WIDTH; j ++) {
+        int id = i * WIDTH + j;
+
+        // maybe making a graph with this
+      }
+    }
   }
 
   public ArrayList<Integer> stringToList(String s) {
