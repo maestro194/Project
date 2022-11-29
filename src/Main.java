@@ -21,7 +21,7 @@ public class Main {
     int totalRun = 0;
 
     // solving
-    for(; ; totalRun ++) {
+    for (; ; totalRun++) {
     /*
       brute force solution
 
@@ -48,20 +48,21 @@ public class Main {
       nonogram.rowDPSolving();
       nonogram.colDPSolving();
 
-      // Solution check
-      if(nonogram.checkAnswer() || totalRun == 500) {
       // small logic help
       nonogram.fastLineSolving();
 
-      if(nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
-        nonogram.printBoard(totalRun);
-        break;
+      // Solution check
+      if (nonogram.checkAnswer() || totalRun == 500) {
+        if (nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
+          nonogram.printBoard(totalRun);
+          break;
+        }
       }
-    }
 
-    // closing
-    long endTime = System.nanoTime();
-    nonogram.writeRunTime(endTime - startTime);
-    nonogram.close();
+      // closing
+      long endTime = System.nanoTime();
+      nonogram.writeRunTime(endTime - startTime);
+      nonogram.close();
+    }
   }
 }
