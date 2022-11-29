@@ -627,84 +627,139 @@ public class Nonogram {
   public void fastLineSolving() {
     int[] maxClue = new int[Math.max(HEIGHT, WIDTH)];
     int[] minClue = new int[Math.max(WIDTH, HEIGHT)];
-    int count = 0;
-    /*
-      if maxClue = 3
-      known: ..***..
-      imply: .x***x.
-     */
+    int cnt = 0;
+
+    // row max
     for(int i = 0; i < HEIGHT; i ++) {
       maxClue[i] = 0;
       for(int j = 0; j < rowClue.get(i).size(); j ++)
         maxClue[i] = Math.max(maxClue[i], rowClue.get(i).get(j));
     }
+
+    /*
+      max = 3, cur = ..***.. -> .x***x.
+     */
     for(int i = 0; i < HEIGHT; i ++) {
-      if(maxClue[i] == 0)
-        continue;
-
-      count = 0;
+      cnt = 0;
       for(int j = 0; j < WIDTH; j ++) {
-        if(board[i][j] == 1)
-          count ++;
-        else
-          count = 0;
+        cnt = (board[i][j] == 1 ? cnt + 1 : 0);
 
-        if(count == maxClue[i]) {
-          if(j - maxClue[i] >= 0)
-            board[i][j - maxClue[i]] = 2;
+        if(cnt == maxClue[i]) {
           if(j + 1 < WIDTH)
             board[i][j + 1] = 2;
+          if(j - maxClue[i] >= 0)
+            board[i][j - maxClue[i]] = 2;
         }
       }
     }
-    /*
-      if maxClue = 2
-      known .*.*.
-      imply .*X*.
-     */
-    for(int i = 0; i < HEIGHT; i ++) {
-      for(int j = 0; j < WIDTH - maxClue[i]; j ++) {
-        if(board[i][j] == 1 && board[i][j + maxClue[i]] == 1) {
-          for(int k = j + 1; k < j + maxClue[i]; k ++)
-            board[i][k] = 0;
-          j = j + maxClue[i] - 1;
-        }
-      }
-    }
-    /*
-      similar but for column
-     */
+
+    // col max
     for(int j = 0; j < WIDTH; j ++) {
       maxClue[j] = 0;
       for(int i = 0; i < colClue.get(j).size(); i ++)
         maxClue[j] = Math.max(maxClue[j], colClue.get(j).get(i));
     }
-    for(int j = 0; j < WIDTH; j ++) {
-      count = 0;
-      for(int i = 0; i < HEIGHT; i ++) {
-        if(board[i][j] == 1)
-          count ++;
-        else
-          count = 0;
 
-        if(count == maxClue[j]) {
-          if(i - maxClue[j] >= 0)
-            board[i - maxClue[j]][j] = 2;
+    /*
+      similar to col fix
+     */
+    for(int j = 0; j < WIDTH; j ++) {
+      cnt = 0;
+      for(int i = 0; i < HEIGHT; i ++) {
+        cnt = (board[i][j] == 1 ? cnt + 1 : 0);
+
+        if(cnt == maxClue[j]) {
           if(i + 1 < HEIGHT)
             board[i + 1][j] = 2;
-        }
-      }
-    }
-    for(int j = 0; j < WIDTH; j ++) {
-      for(int i = 0; i < HEIGHT - maxClue[j]; i ++) {
-        if(board[i][j] == 1 && board[i + maxClue[j]][j] == 1) {
-          for(int k = i + 1; k < i + maxClue[j]; k ++)
-            board[k][j] = 2;
-          i = i + maxClue[j] - 1;
+          if(i - maxClue[j] >= 0)
+            board[i - maxClue[j]][j] = 2;
         }
       }
     }
 
+    // row min
+    for(int i = 0; i < HEIGHT; i ++) {
+      minClue[i] = 10000;
+      for(int j = 0; j < rowClue.get(i).size(); j ++)
+        minClue[i] = Math.min(minClue[i], rowClue.get(i).get(j));
+    }
+
+    /*
+      min = 5, cur = .-*..... -> .-*****.
+     */
+    for(int i = 0; i < HEIGHT; i ++) {
+      for(int j = 0; j < WIDTH; j ++) {
+        if(board[i][j] == 1) {
+          if(j == 0 || board[i][j - 1] == 2)
+            for(int k = j; k < j + minClue[i]; k ++)
+              board[i][k] = 1;
+          if(j == WIDTH - 1 || board[i][j + 1] == 2)
+            for(int k = j; k > j - minClue[i]; k --)
+              board[i][k] = 1;
+        }
+      }
+    }
+    /*
+      min = 3, cur = .x..x. -> .xxxx.
+     */
+    for(int i = 0; i < HEIGHT; i ++) {
+      cnt = 0;
+      for(int j = 0; j < WIDTH; j ++) {
+        if(board[i][j] != 2)
+          cnt ++;
+        else {
+          if(cnt < minClue[i]) {
+            for(int k = j - 1; k >= j - cnt; k --)
+              board[i][k] = 2;
+          }
+          cnt = 0;
+        }
+      }
+    }
+
+    // col min
+    for(int j = 0; j < WIDTH; j ++) {
+      minClue[j] = 10000;
+      for(int i = 0; i < colClue.get(j).size(); i ++)
+        minClue[j] = Math.min(minClue[j], colClue.get(j).get(i));
+    }
+
+    /*
+      min = 5, cur = .-*..... -> .-*****.
+     */
+    for(int j = 0; j < WIDTH; j ++) {
+      for(int i = 0; i < HEIGHT; i ++) {
+        if(board[i][j] == 1) {
+          if(i == 0 || board[i - 1][j] == 2)
+            for(int k = i; k < i + minClue[j]; k ++)
+              board[k][j] = 1;
+          if(i == HEIGHT - 1 || board[i + 1][j] == 2)
+            for(int k = i; k > i - minClue[j]; k --)
+              board[k][j] = 1;
+        }
+      }
+    }
+    /*
+      min = 3, cur = .x..x. -> .xxxx.
+     */
+    for(int j = 0; j < WIDTH; j ++) {
+      cnt = 0;
+      for(int i = 0; i < HEIGHT; i ++) {
+        if(board[i][j] != 2)
+          cnt ++;
+        else {
+          if(cnt < minClue[j]) {
+            for(int k = i - 1; k >= i - cnt; k --)
+              board[k][j] = 2;
+          }
+          cnt = 0;
+        }
+      }
+    }
+
+  }
+
+  public void twoSATSolve() {
 
   }
 
@@ -735,7 +790,7 @@ public class Nonogram {
 
     for (int i = 0; i < HEIGHT; i++) {
       for (int j = 0; j < WIDTH; j++) {
-        fileWriter.write((board[i][j] == 1 ? '*' : (board[i][j] == 2 ? 'x' : '.')));
+        fileWriter.write((board[i][j] == 1 ? '*' : (board[i][j] == 2 ? '-' : '.')));
       }
       fileWriter.write('\n');
     }

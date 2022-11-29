@@ -12,8 +12,8 @@ public class Main {
      */
 
     // testing config
-    String testname = "Test_6_Knot.txt";
-    int MAX_RUN_COUNT = 30;
+    String testname = "Test_4_Bucks.txt";
+    int MAX_RUN_COUNT = 40;
 
     // puzzle declaration
     Nonogram nonogram = new Nonogram(testname);
@@ -48,7 +48,7 @@ public class Main {
       nonogram.rowDPSolving();
       nonogram.colDPSolving();
 
-      // small logic help
+      // small heuristic help
       nonogram.fastLineSolving();
 
       // Solution check
