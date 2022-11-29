@@ -769,6 +769,7 @@ public class Nonogram {
         int id = i * WIDTH + j;
 
         // maybe making a graph with this
+        // testing github
       }
     }
   }
