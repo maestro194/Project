@@ -52,17 +52,15 @@ public class Main {
       nonogram.fastLineSolving();
 
       // Solution check
-      if (nonogram.checkAnswer() || totalRun == 500) {
-        if (nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
-          nonogram.printBoard(totalRun);
-          break;
-        }
+      if (nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
+        nonogram.printBoard(totalRun);
+        break;
       }
 
-      // closing
-      long endTime = System.nanoTime();
-      nonogram.writeRunTime(endTime - startTime);
-      nonogram.close();
     }
+    // closing
+    long endTime = System.nanoTime();
+    nonogram.writeRunTime(endTime - startTime);
+    nonogram.close();
   }
 }

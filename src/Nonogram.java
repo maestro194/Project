@@ -14,6 +14,7 @@ public class Nonogram {
   public static List<List<Integer>> rowClueRight;
   public static List<List<Integer>> colClueRight;
   public static int[][] board;
+  public static int[][] restrictionValue;
   public static int[][][] alpha;
   public static int[][][] beta;
   public static FileWriter fileWriter;
@@ -34,6 +35,7 @@ public class Nonogram {
     WIDTH = scanner.nextInt();
     HEIGHT = scanner.nextInt();
     board = new int[HEIGHT][WIDTH];       // change to bitmask
+    restrictionValue = new int[HEIGHT][WIDTH];
     alpha = new int[HEIGHT][WIDTH / 2][WIDTH];
     for (int[][] t1 : alpha) for (int[] t2 : t1) Arrays.fill(t2, 0);
     beta = new int[HEIGHT / 2][WIDTH][HEIGHT];
@@ -759,16 +761,80 @@ public class Nonogram {
 
   }
 
-  public void twoSATSolve() {
-    List<List<Integer>> edge = new ArrayList<>();
-    for(int i = 0; i < WIDTH * HEIGHT; i ++)
-      edge.add(new ArrayList<>());
+  public void guessing() {
+    int[][] tmp_board_1 = board;
+    int[][] tmp_board_2 = board;
+    List<Integer> idList = new ArrayList<>();
 
+    for(int i = 0; i < HEIGHT; i ++)
+      for(int j = 0; j < WIDTH; j ++)
+        if(board[i][j] == 0)
+          idList.add(i * WIDTH + j);
+
+    for(int i = 0; i < idList.size(); i ++) {
+      int low = idList.get(i);
+      int id = i;
+
+      for(int j = i + 1; j < idList.size(); j ++)
+        if(low > restrictionValue[idList.get(j) / WIDTH][idList.get(j) % WIDTH]) {
+          low = restrictionValue[idList.get(j) / WIDTH][idList.get(j) % WIDTH];
+          id = j;
+        }
+
+      int tmp = idList.get(id);
+      idList.set(id, idList.get(i));
+      idList.set(i, id);
+    }
+
+    // guessing till find a conflict
+    for(int i = 0; i < idList.size(); i ++) {
+      int id = idList.get(i);
+      int u = id / WIDTH;
+      int v = id % WIDTH;
+
+      tmp_board_1[u][v] = 1;
+      tmp_board_2[u][v] = 2;
+
+      boolean flag1 = true;
+      boolean flag2 = true;
+
+
+
+      if(flag1 && flag2) {
+        tmp_board_1[u][v] = 0;
+        tmp_board_2[u][v] = 0;
+        continue;
+      }
+
+      if(flag1)
+        board[u][v] = 1;
+      if(flag2)
+        board[u][v] = 2;
+      break;
+    }
+
+  }
+
+  public void revaluate() {
     for(int i = 0; i < HEIGHT; i ++) {
       for(int j = 0; j < WIDTH; j ++) {
-        int id = i * WIDTH + j;
+        restrictionValue[i][j] = 0;
+        if(board[i][j] != 0)
+          continue;
 
-        // maybe making a graph with this
+        int u;
+        u = i - 1;
+        while(u >= 0 && board[u --][j] == 0)
+          restrictionValue[i][j] ++;
+        u = i + 1;
+        while(u < HEIGHT && board[u ++][j] == 0)
+          restrictionValue[i][j] ++;
+        u = j - 1;
+        while(u >= 0 && board[i][u --] == 0)
+          restrictionValue[i][j] ++;
+        u = j + 1;
+        while(u < WIDTH && board[i][u ++] == 0)
+          restrictionValue[i][j] ++;
       }
     }
   }
@@ -931,6 +997,10 @@ public class Nonogram {
     if (tmp - 1 > WIDTH - pos)
       return false;
     return true;
+  }
+
+  public void writeGuessingCount() {
+
   }
 
   public void writeRunTime(long time) {
