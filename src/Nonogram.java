@@ -14,6 +14,7 @@ public class Nonogram {
   public static List<List<Integer>> rowClueRight;
   public static List<List<Integer>> colClueRight;
   public static int[][] board;
+  public static int[][] prevBoard;
   public static int[][] restrictionValue;
   public static int[][][] alpha;
   public static int[][][] beta;
@@ -35,6 +36,8 @@ public class Nonogram {
     WIDTH = scanner.nextInt();
     HEIGHT = scanner.nextInt();
     board = new int[HEIGHT][WIDTH];       // change to bitmask
+    prevBoard = new int[HEIGHT][WIDTH];
+    restrictionValue = new int[HEIGHT][WIDTH];
     alpha = new int[HEIGHT][WIDTH / 2][WIDTH];
     for (int[][] t1 : alpha) for (int[] t2 : t1) Arrays.fill(t2, 0);
     beta = new int[HEIGHT / 2][WIDTH][HEIGHT];
@@ -612,6 +615,7 @@ public class Nonogram {
 
       for(int i = 0; i < WIDTH; i ++)
         board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
+
     }
   }
 
@@ -760,9 +764,191 @@ public class Nonogram {
 
   }
 
+  // GUESSING HERE
+  public String rowPaintGuessing(int row, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return rowPaintGuessingImplement(row, pos, clue);
+  }
+
+  public String rowPaintGuessingImplement(int row, int pos, int clue) {
+    boolean fix0 = rowGuessingFix0(row, pos, clue);
+    boolean fix1 = rowGuessingFix1(row, pos, clue);
+
+    if(fix0 && !fix1)
+      return rowPaintGuessing0(row, pos, clue);
+    else if(!fix0 && fix1)
+      return rowPaintGuessing1(row, pos, clue);
+    else if(!fix0 && !fix1)
+      return "!";
+    else
+      return mergeGuessing(rowPaintGuessing0(row, pos, clue), rowPaintGuessing1(row, pos, clue));
+  }
+
+  public String rowPaintGuessing1(int row, int pos, int clue) {
+    String tmp = "";
+    int len = rowClue.get(row).get(clue);
+    for(int i = pos - len + 1; i <= pos; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return rowPaintGuessing(row, pos - len - 1, clue - 1) + tmp;
+    else
+      return rowPaintGuessing(row, pos - len - 1, clue - 1) + "x" + tmp;
+  }
+
+  public String rowPaintGuessing0(int row, int pos, int clue) {
+    return rowPaintGuessing(row, pos - 1, clue) + "x";
+  }
+
+  public boolean rowGuessingFix(int row, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return rowGuessingFix0(row, pos, clue) | rowGuessingFix1(row, pos, clue);
+  }
+
+  public boolean rowGuessingFix0(int row, int pos, int clue) {
+    if(board[row][pos] == 0 || board[row][pos] == 2)
+      return rowGuessingFix(row, pos - 1, clue);
+    return false;
+  }
+
+  public boolean rowGuessingFix1(int row, int pos, int clue) {
+    if(clue >= 0) {
+      int len = rowClue.get(row).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int i = pos - len + 1; i <= pos; i ++)
+        if(board[row][i] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[row][pos - len] == 1)
+          return false;
+      return rowGuessingFix(row, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String colPaintGuessing(int col, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return colPaintGuessingImplement(col, pos, clue);
+  }
+
+  public String colPaintGuessingImplement(int col, int pos, int clue) {
+    boolean fix0 = colGuessingFix0(col, pos, clue);
+    boolean fix1 = colGuessingFix1(col, pos, clue);
+
+    if(fix0 && !fix1)
+      return colPaintGuessing0(col, pos, clue);
+    else if(!fix0 && fix1)
+      return colPaintGuessing1(col, pos, clue);
+    else if(!fix0 && !fix1)
+      return "!";
+    else
+      return merge(colPaintGuessing0(col, pos, clue), colPaintGuessing1(col, pos, clue));
+  }
+
+  public String colPaintGuessing0(int col, int pos, int clue) {
+    return colPaint(col, pos - 1, clue) + "x";
+  }
+
+  public String colPaintGuessing1(int col, int pos, int clue) {
+    String tmp = "";
+    int len = colClue.get(col).get(clue);
+    for(int i = 0; i < len; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return colPaintGuessing(col, pos - len - 1, clue - 1) + tmp;
+    else
+      return colPaintGuessing(col, pos - len - 1, clue - 1) + "x" + tmp;
+  }
+
+  public boolean colGuessingFix(int col, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return colGuessingFix0(col, pos, clue) | colGuessingFix1(col, pos, clue);
+  }
+
+  public boolean colGuessingFix0(int col, int pos, int clue) {
+    if(board[pos][col] == 0 || board[pos][col] == 2)
+      return colGuessingFix(col, pos - 1, clue);
+    return false;
+  }
+
+  public boolean colGuessingFix1(int col, int pos, int clue) {
+    if(clue >= 0) {
+      int len = colClue.get(col).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int j = pos - len + 1; j <= pos; j ++)
+        if(board[j][col] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[pos - len][col] == 1)
+          return false;
+      return colGuessingFix(col, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String mergeGuessing(String paint0, String paint1) {
+    String val = "";
+    for(int i = 0; i < Math.min(paint1.length(), paint0.length()); i ++) {
+      char c1 = paint1.charAt(i);
+      char c0 = paint0.charAt(i);
+      val += ((c1 == '!' || c0 == '!') ? '!' : c1 != c0 ? '.' : c1);
+    }
+    return val;
+  }
+
+  public boolean rowDPGuessing() {
+    for(int u = 0; u < HEIGHT; u ++) {
+      int clueSize = rowClue.get(u).size();
+      String solveStr = rowPaintGuessing(u, WIDTH - 1, clueSize - 1);
+
+      for(int i = 0; i < solveStr.length(); i ++)
+        if(solveStr.charAt(i) == '!')
+          return false;
+
+      for(int i = 0; i < WIDTH; i ++)
+        board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
+
+    }
+    return true;
+  }
+
+  public boolean colDPGuessing() {
+    for(int n = 0; n < WIDTH; n ++) {
+      int clueSize = colClue.get(n).size();
+      String solveStr = colPaintGuessing(n, HEIGHT - 1, clueSize - 1);
+
+      for(int j = 0; j < solveStr.length(); j ++)
+        if(solveStr.charAt(j) == '!')
+          return false;
+
+      for(int j = 0; j < HEIGHT; j ++)
+        board[j][n] = (solveStr.charAt(j) == '.' ? 0 : solveStr.charAt(j) == '*' ? 1 : 2);
+    }
+    return true;
+  }
+
   public void guessing() {
-    int[][] tmp_board_1 = board;
-    int[][] tmp_board_2 = board;
+    boolean check = true;
+    for(int i = 0; i < HEIGHT; i ++)
+      for(int j = 0; j < WIDTH; j ++)
+        if(board[i][j] != prevBoard[i][j])
+          check = false;
+
+    if(!check) {
+      prevBoard = board;
+      return;
+    }
+
+    revaluate();
+
+    int[][] tmp_board = board;
+    int[][] tmp_board_2;
+
     List<Integer> idList = new ArrayList<>();
 
     for(int i = 0; i < HEIGHT; i ++)
@@ -775,40 +961,96 @@ public class Nonogram {
       int id = i;
 
       for(int j = i + 1; j < idList.size(); j ++)
-        if(low > restrictionValue[idList.get(j) / WIDTH][idList.get(j) % WIDTH]) {
+        if(low < restrictionValue[idList.get(j) / WIDTH][idList.get(j) % WIDTH]) {
           low = restrictionValue[idList.get(j) / WIDTH][idList.get(j) % WIDTH];
           id = j;
         }
 
       int tmp = idList.get(id);
       idList.set(id, idList.get(i));
-      idList.set(i, id);
+      idList.set(i, tmp);
     }
 
     // guessing till find a conflict
-    for(int i = 0; i < idList.size(); i ++) {
-      int id = idList.get(i);
+    for (int id : idList) {
       int u = id / WIDTH;
       int v = id % WIDTH;
-
-      tmp_board_1[u][v] = 1;
-      tmp_board_2[u][v] = 2;
+      int cnt = 0;
 
       boolean flag1 = true;
       boolean flag2 = true;
 
+      board[u][v] = 1;
+      tmp_board[u][v] = 1;
+      tmp_board_2 = board;
+      cnt = 0;
 
+      while (true) {
+        for (int j = 0; j < HEIGHT; j++) {
+          flag1 = rowDPGuessing();
+          if (!flag1)
+            break;
+        }
 
-      if(flag1 && flag2) {
-        tmp_board_1[u][v] = 0;
-        tmp_board_2[u][v] = 0;
+        for (int j = 0; j < WIDTH; j++) {
+          flag1 = colDPGuessing();
+          if (!flag1)
+            break;
+        }
+
+        if(!flag1 || (tmp_board_2 == board && cnt == 5))
+          break;
+        cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
+        tmp_board_2 = board;
+      }
+
+      board[u][v] = 2;
+      tmp_board[u][v] = 2;
+      tmp_board_2 = board;
+      cnt = 0;
+
+      while(true) {
+        for (int j = 0; j < HEIGHT; j++) {
+          flag2 = rowDPGuessing();
+          if (!flag2)
+            break;
+        }
+
+        for (int j = 0; j < WIDTH; j++) {
+          flag2 = colDPGuessing();
+          if (!flag2)
+            break;
+        }
+
+        if(!flag2 || (tmp_board_2 == board && cnt == 5))
+          break;
+        cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
+        tmp_board_2 = board;
+      }
+
+      tmp_board[u][v] = 0;
+
+      try {
+        fileWriter.write(u + " " + v + "\n");
+        fileWriter.write(flag1 + " " + flag2 + "\n");
+        fileWriter.flush();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+      if (flag1 && flag2) {
+        board = tmp_board;
         continue;
       }
 
-      if(flag1)
-        board[u][v] = 1;
-      if(flag2)
-        board[u][v] = 2;
+      if (flag1) {
+        tmp_board[u][v] = 1;
+        board = tmp_board;
+      }
+      if (flag2) {
+        tmp_board[u][v] = 2;
+        board = tmp_board;
+      }
       break;
     }
 

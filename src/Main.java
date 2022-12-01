@@ -13,7 +13,7 @@ public class Main {
 
     // testing config
     String testname = "Test_4_Bucks.txt";
-    int MAX_RUN_COUNT = 40;
+    int MAX_RUN_COUNT = 50;
 
     // puzzle declaration
     Nonogram nonogram = new Nonogram(testname);
@@ -45,11 +45,17 @@ public class Main {
     */
 
       // DP Solution
-      nonogram.rowDPSolving();
       nonogram.colDPSolving();
+      nonogram.rowDPSolving();
 
       // small heuristic help
       nonogram.fastLineSolving();
+
+      // guessing
+      nonogram.guessing();
+
+      // debug
+      nonogram.printBoard(totalRun);
 
       // Solution check
       if (nonogram.checkAnswer() || totalRun == MAX_RUN_COUNT) {
