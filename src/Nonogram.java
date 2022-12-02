@@ -838,12 +838,12 @@ public class Nonogram {
     boolean fix0 = colGuessingFix0(col, pos, clue);
     boolean fix1 = colGuessingFix1(col, pos, clue);
 
-    if(fix0 && !fix1)
-      return colPaintGuessing0(col, pos, clue);
+    if(!fix0 && !fix1)
+      return "!";
     else if(!fix0 && fix1)
       return colPaintGuessing1(col, pos, clue);
-    else if(!fix0 && !fix1)
-      return "!";
+    else if(fix0 && !fix1)
+      return colPaintGuessing0(col, pos, clue);
     else
       return merge(colPaintGuessing0(col, pos, clue), colPaintGuessing1(col, pos, clue));
   }
@@ -975,7 +975,7 @@ public class Nonogram {
     for (int id : idList) {
       int u = id / WIDTH;
       int v = id % WIDTH;
-      int cnt = 0;
+      int cnt;
 
       boolean flag1 = true;
       boolean flag2 = true;
@@ -998,7 +998,7 @@ public class Nonogram {
             break;
         }
 
-        if(!flag1 || (tmp_board_2 == board && cnt == 5))
+        if(!flag1 || (tmp_board_2 == board && cnt == 10))
           break;
         cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
         tmp_board_2 = board;
@@ -1022,7 +1022,7 @@ public class Nonogram {
             break;
         }
 
-        if(!flag2 || (tmp_board_2 == board && cnt == 5))
+        if(!flag2 || (tmp_board_2 == board && cnt == 10))
           break;
         cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
         tmp_board_2 = board;
