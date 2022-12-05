@@ -474,161 +474,6 @@ public class Nonogram {
     }
   }
 
-  // DP SOLVE HERE
-
-  public String rowPaint(int row, int pos, int clue) {
-    if(pos < 0)
-      return "";
-    return rowPaintImplement(row, pos, clue);
-  }
-
-  public String rowPaintImplement(int row, int pos, int clue) {
-    boolean fix0 = rowFix0(row, pos, clue);
-    boolean fix1 = rowFix1(row, pos, clue);
-
-    if(fix0 && !fix1)
-      return rowPaint0(row, pos, clue);
-    else if(!fix0 && fix1)
-      return rowPaint1(row, pos, clue);
-    else
-      return merge(rowPaint0(row, pos, clue), rowPaint1(row, pos, clue));
-  }
-
-  public String rowPaint1(int row, int pos, int clue) {
-    String tmp = "";
-    int len = rowClue.get(row).get(clue);
-    for(int i = pos - len + 1; i <= pos; i ++)
-      tmp += "*";
-    if(pos - len < 0)
-      return rowPaint(row, pos - len - 1, clue - 1) + tmp;
-    else
-      return rowPaint(row, pos - len - 1, clue - 1) + "x" + tmp;
-  }
-
-  public String rowPaint0(int row, int pos, int clue) {
-    return rowPaint(row, pos - 1, clue) + "x";
-  }
-
-  public boolean rowFix(int row, int pos, int clue) {
-    if(pos < 0)
-      return clue == -1;
-    return rowFix0(row, pos, clue) | rowFix1(row, pos, clue);
-  }
-
-  public boolean rowFix0(int row, int pos, int clue) {
-    if(board[row][pos] == 0 || board[row][pos] == 2)
-      return rowFix(row, pos - 1, clue);
-    return false;
-  }
-
-  public boolean rowFix1(int row, int pos, int clue) {
-    if(clue >= 0) {
-      int len = rowClue.get(row).get(clue);
-      if(pos - len + 1 < 0)
-        return false;
-      for(int i = pos - len + 1; i <= pos; i ++)
-        if(board[row][i] == 2)
-          return false;
-      if(pos - len >= 0)
-        if(board[row][pos - len] == 1)
-          return false;
-      return rowFix(row, pos - len - 1, clue - 1);
-    }
-    return false;
-  }
-
-  public String colPaint(int col, int pos, int clue) {
-    if(pos < 0)
-      return "";
-    return colPaintImplement(col, pos, clue);
-  }
-
-  public String colPaintImplement(int col, int pos, int clue) {
-    boolean fix0 = colFix0(col, pos, clue);
-    boolean fix1 = colFix1(col, pos, clue);
-
-    if(fix0 && !fix1)
-      return colPaint0(col, pos, clue);
-    else if(!fix0 && fix1)
-      return colPaint1(col, pos, clue);
-    else
-      return merge(colPaint0(col, pos, clue), colPaint1(col, pos, clue));
-  }
-
-  public String colPaint0(int col, int pos, int clue) {
-    return colPaint(col, pos - 1, clue) + "x";
-  }
-
-  public String colPaint1(int col, int pos, int clue) {
-    String tmp = "";
-    int len = colClue.get(col).get(clue);
-    for(int i = 0; i < len; i ++)
-      tmp += "*";
-    if(pos - len < 0)
-      return colPaint(col, pos - len - 1, clue - 1) + tmp;
-    else
-      return colPaint(col, pos - len - 1, clue - 1) + "x" + tmp;
-  }
-
-  public boolean colFix(int col, int pos, int clue) {
-    if(pos < 0)
-      return clue == -1;
-    return colFix0(col, pos, clue) | colFix1(col, pos, clue);
-  }
-
-  public boolean colFix0(int col, int pos, int clue) {
-    if(board[pos][col] == 0 || board[pos][col] == 2)
-      return colFix(col, pos - 1, clue);
-    return false;
-  }
-
-  public boolean colFix1(int col, int pos, int clue) {
-    if(clue >= 0) {
-      int len = colClue.get(col).get(clue);
-      if(pos - len + 1 < 0)
-        return false;
-      for(int j = pos - len + 1; j <= pos; j ++)
-        if(board[j][col] == 2)
-          return false;
-      if(pos - len >= 0)
-        if(board[pos - len][col] == 1)
-          return false;
-      return colFix(col, pos - len - 1, clue - 1);
-    }
-    return false;
-  }
-
-  public String merge(String paint0, String paint1) {
-    String val = "";
-    for(int i = 0; i < paint1.length(); i ++) {
-      char c1 = paint1.charAt(i);
-      char c0 = paint0.charAt(i);
-      val += (c1 != c0 ? '.' : c1);
-    }
-    return val;
-  }
-
-  public void rowDPSolving() {
-    for(int u = 0; u < HEIGHT; u ++) {
-      int clueSize = rowClue.get(u).size();
-      String solveStr = rowPaint(u, WIDTH - 1, clueSize - 1);
-
-      for(int i = 0; i < WIDTH; i ++)
-        board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
-
-    }
-  }
-
-  public void colDPSolving() {
-    for(int n = 0; n < WIDTH; n ++) {
-      int clueSize = colClue.get(n).size();
-      String solveStr = colPaint(n, HEIGHT - 1, clueSize - 1);
-
-      for(int j = 0; j < HEIGHT; j ++)
-        board[j][n] = (solveStr.charAt(j) == '.' ? 0 : solveStr.charAt(j) == '*' ? 1 : 2);
-    }
-  }
-
   public void fastLineSolving() {
     int[] maxClue = new int[Math.max(HEIGHT, WIDTH)];
     int[] minClue = new int[Math.max(WIDTH, HEIGHT)];
@@ -793,11 +638,11 @@ public class Nonogram {
     if(pos - len < 0)
       return rowPaintGuessing(row, pos - len - 1, clue - 1) + tmp;
     else
-      return rowPaintGuessing(row, pos - len - 1, clue - 1) + "x" + tmp;
+      return rowPaintGuessing(row, pos - len - 1, clue - 1) + "-" + tmp;
   }
 
   public String rowPaintGuessing0(int row, int pos, int clue) {
-    return rowPaintGuessing(row, pos - 1, clue) + "x";
+    return rowPaintGuessing(row, pos - 1, clue) + "-";
   }
 
   public boolean rowGuessingFix(int row, int pos, int clue) {
@@ -845,11 +690,11 @@ public class Nonogram {
     else if(fix0 && !fix1)
       return colPaintGuessing0(col, pos, clue);
     else
-      return merge(colPaintGuessing0(col, pos, clue), colPaintGuessing1(col, pos, clue));
+      return mergeGuessing(colPaintGuessing0(col, pos, clue), colPaintGuessing1(col, pos, clue));
   }
 
   public String colPaintGuessing0(int col, int pos, int clue) {
-    return colPaint(col, pos - 1, clue) + "x";
+    return colPaintGuessing(col, pos - 1, clue) + "-";
   }
 
   public String colPaintGuessing1(int col, int pos, int clue) {
@@ -860,7 +705,7 @@ public class Nonogram {
     if(pos - len < 0)
       return colPaintGuessing(col, pos - len - 1, clue - 1) + tmp;
     else
-      return colPaintGuessing(col, pos - len - 1, clue - 1) + "x" + tmp;
+      return colPaintGuessing(col, pos - len - 1, clue - 1) + "-" + tmp;
   }
 
   public boolean colGuessingFix(int col, int pos, int clue) {
@@ -901,7 +746,7 @@ public class Nonogram {
     return val;
   }
 
-  public boolean rowDPGuessing() {
+  public boolean rowGuessing() {
     for(int u = 0; u < HEIGHT; u ++) {
       int clueSize = rowClue.get(u).size();
       String solveStr = rowPaintGuessing(u, WIDTH - 1, clueSize - 1);
@@ -917,7 +762,7 @@ public class Nonogram {
     return true;
   }
 
-  public boolean colDPGuessing() {
+  public boolean colGuessing() {
     for(int n = 0; n < WIDTH; n ++) {
       int clueSize = colClue.get(n).size();
       String solveStr = colPaintGuessing(n, HEIGHT - 1, clueSize - 1);
@@ -940,13 +785,13 @@ public class Nonogram {
           check = false;
 
     if(!check) {
-      prevBoard = board;
+      prevBoard =  copy(board);
       return;
     }
 
     revaluate();
 
-    int[][] tmp_board = board;
+    int[][] tmp_board = copy(board);
     int[][] tmp_board_2;
 
     List<Integer> idList = new ArrayList<>();
@@ -980,76 +825,74 @@ public class Nonogram {
       boolean flag1 = true;
       boolean flag2 = true;
 
-      board[u][v] = 1;
       tmp_board[u][v] = 1;
-      tmp_board_2 = board;
+      board = copy(tmp_board);
+      tmp_board_2 = copy(board);
       cnt = 0;
 
       while (true) {
         for (int j = 0; j < HEIGHT; j++) {
-          flag1 = rowDPGuessing();
+          flag1 = rowGuessing();
           if (!flag1)
             break;
         }
+
+        if(!flag1)
+          break;
 
         for (int j = 0; j < WIDTH; j++) {
-          flag1 = colDPGuessing();
+          flag1 = colGuessing();
           if (!flag1)
             break;
         }
 
-        if(!flag1 || (tmp_board_2 == board && cnt == 10))
+        if(!flag1 || (Arrays.deepEquals(board, tmp_board_2) && cnt == 3))
           break;
-        cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
-        tmp_board_2 = board;
+        cnt = (Arrays.deepEquals(board, tmp_board_2) ? cnt + 1 : 0);
+        tmp_board_2 = copy(board);
       }
 
-      board[u][v] = 2;
       tmp_board[u][v] = 2;
-      tmp_board_2 = board;
+      board = copy(tmp_board);
+      tmp_board_2 = copy(board);
       cnt = 0;
 
       while(true) {
         for (int j = 0; j < HEIGHT; j++) {
-          flag2 = rowDPGuessing();
+          flag2 = rowGuessing();
           if (!flag2)
             break;
         }
+
+        if(!flag2)
+          break;
 
         for (int j = 0; j < WIDTH; j++) {
-          flag2 = colDPGuessing();
+          flag2 = colGuessing();
           if (!flag2)
             break;
         }
 
-        if(!flag2 || (tmp_board_2 == board && cnt == 10))
+        if(!flag2 || (Arrays.deepEquals(board, tmp_board_2) && cnt == 3))
           break;
-        cnt = (tmp_board_2 == board) ? cnt + 1 : 0;
-        tmp_board_2 = board;
+        cnt = (Arrays.deepEquals(board, tmp_board_2) ? cnt + 1 : 0);
+        tmp_board_2 = copy(board);
       }
 
       tmp_board[u][v] = 0;
 
-      try {
-        fileWriter.write(u + " " + v + "\n");
-        fileWriter.write(flag1 + " " + flag2 + "\n");
-        fileWriter.flush();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-
       if (flag1 && flag2) {
-        board = tmp_board;
+        board = copy(tmp_board);
         continue;
       }
 
       if (flag1) {
         tmp_board[u][v] = 1;
-        board = tmp_board;
+        board = copy(tmp_board);
       }
       if (flag2) {
         tmp_board[u][v] = 2;
-        board = tmp_board;
+        board = copy(tmp_board);
       }
       break;
     }
@@ -1096,6 +939,14 @@ public class Nonogram {
       val.add(x);
     }
     return val;
+  }
+
+  public int[][] copy(int[][] board2) {
+    int[][] board1 = new int[HEIGHT][WIDTH];
+    for(int i = 0; i < HEIGHT; i ++)
+      if (WIDTH >= 0)
+        System.arraycopy(board2[i], 0, board1[i], 0, WIDTH);
+    return board1;
   }
 
   public void printBoard(int runCount) throws IOException {

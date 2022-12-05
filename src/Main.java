@@ -12,7 +12,7 @@ public class Main {
      */
 
     // testing config
-    String testname = "Test_4_Bucks.txt";
+    String testname = "Test_7_Swing.txt";
     int MAX_RUN_COUNT = 50;
 
     // puzzle declaration
@@ -22,8 +22,8 @@ public class Main {
 
     // solving
     for (; ; totalRun++) {
-    /*
-      brute force solution
+
+//      brute force solution
 
       // simple boxes method
       nonogram.rowSimpleBoxes();
@@ -39,14 +39,6 @@ public class Main {
 
       // range recalculaiton
       nonogram.firstLastRecalculation();
-
-      // board debug
-      nonogram.printAB();
-    */
-
-      // DP Solution
-      nonogram.colDPSolving();
-      nonogram.rowDPSolving();
 
       // small heuristic help
       nonogram.fastLineSolving();
