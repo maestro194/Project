@@ -12,7 +12,7 @@ public class Main {
      */
 
     // testing config
-    String testname = "Test_7_Swing.txt";
+    String testname = "Test_8_Mum.txt";
     int MAX_RUN_COUNT = 50;
 
     // puzzle declaration
