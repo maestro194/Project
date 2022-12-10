@@ -1,8 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Nonogram {
   public static int WIDTH;
@@ -162,7 +159,6 @@ public class Nonogram {
   }
 
   // NAIVE SOLVE HERE
-  // Time Complexity:
 
   public void naive(int i, int j, int row) throws IOException {
     if (row == HEIGHT) {
@@ -609,6 +605,159 @@ public class Nonogram {
 
   }
 
+  // FORCING
+  public String rowPaint(int row, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return rowPaintImplement(row, pos, clue);
+  }
+
+  public String rowPaintImplement(int row, int pos, int clue) {
+    boolean fix0 = rowFix0(row, pos, clue);
+    boolean fix1 = rowFix1(row, pos, clue);
+
+    if(fix0 && !fix1)
+      return rowPaint0(row, pos, clue);
+    else if(!fix0 && fix1)
+      return rowPaint1(row, pos, clue);
+    else
+      return merge(rowPaint0(row, pos, clue), rowPaint1(row, pos, clue));
+  }
+
+  public String rowPaint1(int row, int pos, int clue) {
+    String tmp = "";
+    int len = rowClue.get(row).get(clue);
+    for(int i = pos - len + 1; i <= pos; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return rowPaint(row, pos - len - 1, clue - 1) + tmp;
+    else
+      return rowPaint(row, pos - len - 1, clue - 1) + "-" + tmp;
+  }
+
+  public String rowPaint0(int row, int pos, int clue) {
+    return rowPaint(row, pos - 1, clue) + "-";
+  }
+
+  public boolean rowFix(int row, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return rowFix0(row, pos, clue) | rowFix1(row, pos, clue);
+  }
+
+  public boolean rowFix0(int row, int pos, int clue) {
+    if(board[row][pos] == 0 || board[row][pos] == 2)
+      return rowFix(row, pos - 1, clue);
+    return false;
+  }
+
+  public boolean rowFix1(int row, int pos, int clue) {
+    if(clue >= 0) {
+      int len = rowClue.get(row).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int i = pos - len + 1; i <= pos; i ++)
+        if(board[row][i] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[row][pos - len] == 1)
+          return false;
+      return rowFix(row, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String colPaint(int col, int pos, int clue) {
+    if(pos < 0)
+      return "";
+    return colPaintImplement(col, pos, clue);
+  }
+
+  public String colPaintImplement(int col, int pos, int clue) {
+    boolean fix0 = colFix0(col, pos, clue);
+    boolean fix1 = colFix1(col, pos, clue);
+
+    if(!fix0 && fix1)
+      return colPaint1(col, pos, clue);
+    else if(fix0 && !fix1)
+      return colPaint0(col, pos, clue);
+    else
+      return merge(colPaint0(col, pos, clue), colPaint1(col, pos, clue));
+  }
+
+  public String colPaint0(int col, int pos, int clue) {
+    return colPaint(col, pos - 1, clue) + "-";
+  }
+
+  public String colPaint1(int col, int pos, int clue) {
+    String tmp = "";
+    int len = colClue.get(col).get(clue);
+    for(int i = 0; i < len; i ++)
+      tmp += "*";
+    if(pos - len < 0)
+      return colPaint(col, pos - len - 1, clue - 1) + tmp;
+    else
+      return colPaint(col, pos - len - 1, clue - 1) + "-" + tmp;
+  }
+
+  public boolean colFix(int col, int pos, int clue) {
+    if(pos < 0)
+      return clue == -1;
+    return colFix0(col, pos, clue) | colFix1(col, pos, clue);
+  }
+
+  public boolean colFix0(int col, int pos, int clue) {
+    if(board[pos][col] == 0 || board[pos][col] == 2)
+      return colFix(col, pos - 1, clue);
+    return false;
+  }
+
+  public boolean colFix1(int col, int pos, int clue) {
+    if(clue >= 0) {
+      int len = colClue.get(col).get(clue);
+      if(pos - len + 1 < 0)
+        return false;
+      for(int j = pos - len + 1; j <= pos; j ++)
+        if(board[j][col] == 2)
+          return false;
+      if(pos - len >= 0)
+        if(board[pos - len][col] == 1)
+          return false;
+      return colFix(col, pos - len - 1, clue - 1);
+    }
+    return false;
+  }
+
+  public String merge(String paint0, String paint1) {
+    String val = "";
+    for(int i = 0; i < Math.min(paint1.length(), paint0.length()); i ++) {
+      char c1 = paint1.charAt(i);
+      char c0 = paint0.charAt(i);
+      val += (c1 != c0 ? '.' : c1);
+    }
+    return val;
+  }
+
+  public void rowBrute() {
+    for(int u = 0; u < HEIGHT; u ++) {
+      int clueSize = rowClue.get(u).size();
+      String solveStr = rowPaint(u, WIDTH - 1, clueSize - 1);
+
+      for(int i = 0; i < WIDTH; i ++)
+        board[u][i] = (solveStr.charAt(i) == '.' ? 0 : solveStr.charAt(i) == '*' ? 1 : 2);
+    }
+  }
+
+  public void colBrute() {
+    for(int n = 0; n < WIDTH; n ++) {
+      int clueSize = colClue.get(n).size();
+      String solveStr = colPaint(n, HEIGHT - 1, clueSize - 1);
+
+      for(int j = 0; j < HEIGHT; j ++)
+        board[j][n] = (solveStr.charAt(j) == '.' ? 0 : solveStr.charAt(j) == '*' ? 1 : 2);
+    }
+  }
+
   // GUESSING HERE
   public String rowPaintGuessing(int row, int pos, int clue) {
     if(pos < 0)
@@ -778,6 +927,8 @@ public class Nonogram {
   }
 
   public void guessing() {
+
+
     boolean check = true;
     for(int i = 0; i < HEIGHT; i ++)
       for(int j = 0; j < WIDTH; j ++)
@@ -793,6 +944,7 @@ public class Nonogram {
 
     int[][] tmp_board = copy(board);
     int[][] tmp_board_2;
+    int numRolling = 0;
 
     List<Integer> idList = new ArrayList<>();
 
@@ -816,8 +968,24 @@ public class Nonogram {
       idList.set(i, tmp);
     }
 
-    // guessing till find a conflict
-    for (int id : idList) {
+    // prepare to roll
+    for(int id: idList) {
+      int u = id / WIDTH;
+      int v = id % WIDTH;
+      numRolling += restrictionValue[u][v];
+    }
+
+    // guessing till find a conflict or 10 times
+    Random random = new Random();
+    for (int i = 0; i < 10; i ++) {
+      int roll = random.nextInt(numRolling);
+      int tmp = 0;
+      int id = 0;
+      for(int idNum : idList) {
+        tmp += restrictionValue[idNum / WIDTH][idNum % WIDTH];
+        if(tmp > roll)
+          id = idNum;
+      }
       int u = id / WIDTH;
       int v = id % WIDTH;
       int cnt;
